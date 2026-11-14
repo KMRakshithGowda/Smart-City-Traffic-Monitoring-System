@@ -1,0 +1,503 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Smart City Traffic Monitoring & Analytics System</title>
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Leaflet CSS & JS (Free OpenStreetMap - Zero Cost) -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <!-- Chart.js CDN -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <!-- FontAwesome Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"/>
+  <style>
+    @keyframes pulse-red {
+      0%, 100% { opacity: 1; transform: scale(1); }
+      50% { opacity: 0.75; transform: scale(1.04); }
+    }
+    .alert-glow {
+      animation: pulse-red 1.8s infinite ease-in-out;
+    }
+    #trafficMap {
+      height: 420px;
+      width: 100%;
+      border-radius: 0.75rem;
+      z-index: 10;
+    }
+  </style>
+</head>
+<body class="bg-slate-950 text-slate-100 min-h-screen flex flex-col font-sans antialiased">
+
+  <!-- Top Navigation Bar -->
+  <header class="bg-slate-900/90 border-b border-slate-800 backdrop-blur sticky top-0 z-50 px-6 py-4 flex flex-wrap items-center justify-between gap-4">
+    <div class="flex items-center space-x-3">
+      <div class="p-2.5 bg-indigo-600/20 border border-indigo-500/40 rounded-xl text-indigo-400 text-xl">
+        <i class="fa-solid fa-traffic-light"></i>
+      </div>
+      <div>
+        <h1 class="text-xl font-bold tracking-tight text-white flex items-center gap-2">
+          Smart City Traffic Monitoring System
+          <span class="text-xs px-2.5 py-0.5 font-semibold bg-emerald-500/20 text-emerald-400 border border-emerald-500/40 rounded-full">AWS Cloud Hosted</span>
+        </h1>
+        <p class="text-xs text-slate-400">Cloud Computing Assignment #22 • IoT Ingestion & Real-Time Congestion Analytics</p>
+      </div>
+    </div>
+
+    <!-- Right Controls -->
+    <div class="flex items-center space-x-3 text-xs">
+      <div class="flex items-center bg-slate-800 px-3 py-1.5 rounded-lg border border-slate-700">
+        <span class="inline-block w-2.5 h-2.5 rounded-full bg-emerald-400 animate-pulse mr-2"></span>
+        <span id="systemClock" class="font-mono text-slate-300">--:--:--</span>
+      </div>
+      <a href="/api/export-csv" class="bg-indigo-600 hover:bg-indigo-500 text-white font-medium px-3.5 py-2 rounded-lg transition flex items-center gap-1.5 shadow-sm">
+        <i class="fa-solid fa-download"></i> Export Evidence CSV
+      </a>
+    </div>
+  </header>
+
+  <!-- Main Container -->
+  <main class="flex-1 p-6 max-w-7xl mx-auto w-full space-y-6">
+
+    <!-- Active Congestion Alert Banner (Dynamic) -->
+    <div id="alertBanner" class="hidden p-4 rounded-xl border border-red-500/40 bg-red-950/40 text-red-300 alert-glow flex items-center justify-between shadow-lg">
+      <div class="flex items-center space-x-3">
+        <span class="text-2xl text-red-400"><i class="fa-solid fa-triangle-exclamation"></i></span>
+        <div>
+          <h2 class="font-bold text-red-200">Critical Congestion Alert Detected</h2>
+          <p id="alertBannerText" class="text-xs text-red-300 mt-0.5">Threshold violated: Vehicle Count > 500 OR Speed < 15 km/h.</p>
+        </div>
+      </div>
+      <span class="text-xs px-3 py-1 bg-red-600/30 border border-red-500 text-red-200 rounded-lg font-mono font-bold">HIGH PRIORITY</span>
+    </div>
+
+    <!-- 4 Key Performance Indicators (KPI Cards) -->
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+      <!-- KPI 1 -->
+      <div class="bg-slate-900 border border-slate-800 rounded-xl p-4 flex items-center justify-between shadow-sm">
+        <div>
+          <p class="text-xs font-medium text-slate-400 uppercase tracking-wider">Active Road Sensors</p>
+          <h3 id="kpiSensors" class="text-2xl font-bold text-white mt-1">--</h3>
+          <span class="text-xs text-emerald-400"><i class="fa-solid fa-satellite-dish mr-1"></i> Continuous Stream</span>
+        </div>
+        <div class="p-3 bg-blue-500/10 text-blue-400 border border-blue-500/20 rounded-xl text-lg">
+          <i class="fa-solid fa-network-wired"></i>
+        </div>
+      </div>
+
+      <!-- KPI 2 -->
+      <div class="bg-slate-900 border border-slate-800 rounded-xl p-4 flex items-center justify-between shadow-sm">
+        <div>
+          <p class="text-xs font-medium text-slate-400 uppercase tracking-wider">Monitored Vehicle Volume</p>
+          <h3 id="kpiVehicles" class="text-2xl font-bold text-white mt-1">--</h3>
+          <span class="text-xs text-slate-400">Instantaneous count</span>
+        </div>
+        <div class="p-3 bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 rounded-xl text-lg">
+          <i class="fa-solid fa-car"></i>
+        </div>
+      </div>
+
+      <!-- KPI 3 -->
+      <div class="bg-slate-900 border border-slate-800 rounded-xl p-4 flex items-center justify-between shadow-sm">
+        <div>
+          <p class="text-xs font-medium text-slate-400 uppercase tracking-wider">Citywide Avg Speed</p>
+          <h3 id="kpiSpeed" class="text-2xl font-bold text-white mt-1">-- km/h</h3>
+          <span id="speedStatus" class="text-xs text-slate-400">Normal city flow</span>
+        </div>
+        <div class="p-3 bg-amber-500/10 text-amber-400 border border-amber-500/20 rounded-xl text-lg">
+          <i class="fa-solid fa-gauge-high"></i>
+        </div>
+      </div>
+
+      <!-- KPI 4 -->
+      <div class="bg-slate-900 border border-slate-800 rounded-xl p-4 flex items-center justify-between shadow-sm">
+        <div>
+          <p class="text-xs font-medium text-slate-400 uppercase tracking-wider">Active Congestion Alerts</p>
+          <h3 id="kpiAlerts" class="text-2xl font-bold text-white mt-1">0</h3>
+          <span class="text-xs text-red-400"><i class="fa-solid fa-bell mr-1"></i> Threshold violations</span>
+        </div>
+        <div id="kpiAlertIcon" class="p-3 bg-red-500/10 text-red-400 border border-red-500/20 rounded-xl text-lg">
+          <i class="fa-solid fa-radiation"></i>
+        </div>
+      </div>
+    </div>
+
+    <!-- Map & Analytics Spotlight Row -->
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+      
+      <!-- Interactive OpenStreetMap (Free, Leaflet) -->
+      <div class="lg:col-span-2 bg-slate-900 border border-slate-800 rounded-xl p-5 shadow-sm flex flex-col">
+        <div class="flex items-center justify-between mb-3">
+          <div>
+            <h2 class="font-bold text-slate-100 flex items-center gap-2">
+              <i class="fa-solid fa-map-location-dot text-indigo-400"></i>
+              Real-Time Smart City Traffic Heat Map
+            </h2>
+            <p class="text-xs text-slate-400">Visual geospatial monitoring of sensor nodes across city transit corridors</p>
+          </div>
+          <div class="flex items-center space-x-2 text-xs">
+            <span class="inline-flex items-center text-emerald-400 mr-2"><span class="w-2.5 h-2.5 rounded-full bg-emerald-500 mr-1"></span> Smooth</span>
+            <span class="inline-flex items-center text-amber-400 mr-2"><span class="w-2.5 h-2.5 rounded-full bg-amber-500 mr-1"></span> Moderate</span>
+            <span class="inline-flex items-center text-red-400"><span class="w-2.5 h-2.5 rounded-full bg-red-500 mr-1"></span> Congested</span>
+          </div>
+        </div>
+        <div id="trafficMap"></div>
+      </div>
+
+      <!-- Most Congested Road & Peak Period Card -->
+      <div class="bg-slate-900 border border-slate-800 rounded-xl p-5 shadow-sm flex flex-col justify-between space-y-4">
+        <div>
+          <div class="flex items-center justify-between mb-3 border-b border-slate-800 pb-2">
+            <h2 class="font-bold text-slate-100 text-sm flex items-center gap-2">
+              <i class="fa-solid fa-fire text-amber-400"></i> Most Congested Road
+            </h2>
+            <span class="text-xs px-2 py-0.5 bg-amber-500/20 text-amber-400 border border-amber-500/30 rounded">Rank #1</span>
+          </div>
+          <div class="p-3.5 bg-slate-800/60 rounded-xl border border-slate-700/60">
+            <h3 id="worstRoadName" class="font-bold text-white text-base">Calculating...</h3>
+            <div class="grid grid-cols-2 gap-2 mt-2 text-xs">
+              <div class="bg-slate-900/80 p-2 rounded border border-slate-800">
+                <span class="text-slate-400 block">Avg Speed</span>
+                <span id="worstRoadSpeed" class="font-bold text-red-400">-- km/h</span>
+              </div>
+              <div class="bg-slate-900/80 p-2 rounded border border-slate-800">
+                <span class="text-slate-400 block">Road Occupancy</span>
+                <span id="worstRoadOccupancy" class="font-bold text-amber-400">--%</span>
+              </div>
+            </div>
+            <div class="mt-2 text-xs text-slate-400">
+              Total Recorded Alerts: <span id="worstRoadAlerts" class="font-bold text-red-400">0</span>
+            </div>
+          </div>
+        </div>
+
+        <div>
+          <div class="flex items-center justify-between mb-2 border-b border-slate-800 pb-2">
+            <h2 class="font-bold text-slate-100 text-sm flex items-center gap-2">
+              <i class="fa-solid fa-clock text-blue-400"></i> Peak Traffic Periods
+            </h2>
+            <span class="text-xs text-slate-400">Top Ingestion Hours</span>
+          </div>
+          <div id="peakHoursList" class="space-y-2 text-xs">
+            <div class="text-slate-400 text-center py-2">Loading peak analytics...</div>
+          </div>
+        </div>
+
+
+      </div>
+
+    </div>
+
+    <!-- Visual Analytics Charts Row (Professor Requirement) -->
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      
+      <!-- Chart 1: Vehicle Volume Trends -->
+      <div class="bg-slate-900 border border-slate-800 rounded-xl p-5 shadow-sm">
+        <div class="flex items-center justify-between mb-3">
+          <div>
+            <h2 class="font-bold text-slate-100 text-sm flex items-center gap-2">
+              <i class="fa-solid fa-chart-line text-emerald-400"></i> Vehicle Volume Trends (Live Stream)
+            </h2>
+            <p class="text-xs text-slate-400">Real-time incoming vehicle counts across sensor time-series</p>
+          </div>
+          <span class="text-xs px-2 py-0.5 bg-emerald-500/20 text-emerald-400 rounded">Time-Series</span>
+        </div>
+        <div class="h-64">
+          <canvas id="volumeTrendChart"></canvas>
+        </div>
+      </div>
+
+      <!-- Chart 2: Average Traffic by Hour -->
+      <div class="bg-slate-900 border border-slate-800 rounded-xl p-5 shadow-sm">
+        <div class="flex items-center justify-between mb-3">
+          <div>
+            <h2 class="font-bold text-slate-100 text-sm flex items-center gap-2">
+              <i class="fa-solid fa-chart-simple text-blue-400"></i> Average Traffic by Hour (24h Trend)
+            </h2>
+            <p class="text-xs text-slate-400">Aggregated historical vehicle volumes by hour interval</p>
+          </div>
+          <span class="text-xs px-2 py-0.5 bg-blue-500/20 text-blue-400 rounded">Hourly Mean</span>
+        </div>
+        <div class="h-64">
+          <canvas id="hourlyTrafficChart"></canvas>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- Real-Time Tables: Sensors & Alerts -->
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+      
+      <!-- Live Sensor Feeds Table (2 Cols) -->
+      <div class="lg:col-span-2 bg-slate-900 border border-slate-800 rounded-xl p-5 shadow-sm">
+        <div class="flex items-center justify-between mb-4">
+          <div>
+            <h2 class="font-bold text-slate-100 text-sm flex items-center gap-2">
+              <i class="fa-solid fa-microchip text-indigo-400"></i> Live Smart City Sensor Feeds
+            </h2>
+            <p class="text-xs text-slate-400">Current readings transmitted from deployed IoT sensors</p>
+          </div>
+          <span class="text-xs text-slate-400">Auto-refresh every 3s</span>
+        </div>
+        <div class="overflow-x-auto">
+          <table class="w-full text-xs text-left">
+            <thead class="bg-slate-800/80 text-slate-300 uppercase tracking-wider font-semibold">
+              <tr>
+                <th class="px-3.5 py-2.5 rounded-l-lg">Sensor ID</th>
+                <th class="px-3.5 py-2.5">Corridor / Road</th>
+                <th class="px-3.5 py-2.5">Vehicles</th>
+                <th class="px-3.5 py-2.5">Avg Speed</th>
+                <th class="px-3.5 py-2.5">Occupancy</th>
+                <th class="px-3.5 py-2.5 rounded-r-lg">Status</th>
+              </tr>
+            </thead>
+            <tbody id="sensorsTableBody" class="divide-y divide-slate-800 font-medium">
+              <tr><td colspan="6" class="text-center py-4 text-slate-500">Connecting to sensor pipeline...</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Real-Time Congestion Alert Feed (1 Col) -->
+      <div class="bg-slate-900 border border-slate-800 rounded-xl p-5 shadow-sm flex flex-col">
+        <div class="flex items-center justify-between mb-4">
+          <div>
+            <h2 class="font-bold text-slate-100 text-sm flex items-center gap-2">
+              <i class="fa-solid fa-bell text-red-400"></i> Congestion Alert Log
+            </h2>
+            <p class="text-xs text-slate-400">Violations: Count &gt; 500 OR Speed &lt; 15 km/h</p>
+          </div>
+        </div>
+        <div class="flex-1 overflow-y-auto max-h-72 space-y-2.5 pr-1" id="alertsList">
+          <div class="text-center py-6 text-slate-500 text-xs">No active congestion alerts recorded.</div>
+        </div>
+      </div>
+
+    </div>
+
+  </main>
+
+  <!-- Footer -->
+  <footer class="border-t border-slate-800/80 bg-slate-900/60 px-6 py-4 text-center text-xs text-slate-500">
+    Cloud Computing — <strong class="text-slate-300">K M Rakshith Gowda</strong>
+  </footer>
+
+  <!-- JavaScript Application Logic -->
+  <script>
+    // 1. Clock
+    function updateClock() {
+      const now = new Date();
+      document.getElementById('systemClock').innerText = now.toLocaleTimeString();
+    }
+    setInterval(updateClock, 1000);
+    updateClock();
+
+    // 2. Initialize Leaflet Map (Bangalore Smart City Coordinates)
+    const map = L.map('trafficMap').setView([12.9850, 77.6400], 11);
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      attribution: '© OpenStreetMap contributors',
+      maxZoom: 18
+    }).addTo(map);
+
+    let mapMarkers = {};
+
+    // 3. Initialize Charts
+    const ctxTrend = document.getElementById('volumeTrendChart').getContext('2d');
+    const volumeTrendChart = new Chart(ctxTrend, {
+      type: 'line',
+      data: {
+        labels: [],
+        datasets: [{
+          label: 'Vehicle Count',
+          data: [],
+          borderColor: '#10b981',
+          backgroundColor: 'rgba(16, 185, 129, 0.15)',
+          fill: true,
+          tension: 0.35,
+          borderWidth: 2,
+          pointRadius: 3
+        }]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        scales: {
+          x: { ticks: { color: '#94a3b8', font: { size: 10 } }, grid: { display: false } },
+          y: { ticks: { color: '#94a3b8', font: { size: 10 } }, grid: { color: '#1e293b' } }
+        },
+        plugins: { legend: { display: false } }
+      }
+    });
+
+    const ctxHourly = document.getElementById('hourlyTrafficChart').getContext('2d');
+    const hourlyTrafficChart = new Chart(ctxHourly, {
+      type: 'bar',
+      data: {
+        labels: [],
+        datasets: [{
+          label: 'Avg Vehicles / Hr',
+          data: [],
+          backgroundColor: '#3b82f6',
+          borderRadius: 4
+        }]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        scales: {
+          x: { ticks: { color: '#94a3b8', font: { size: 10 } }, grid: { display: false } },
+          y: { ticks: { color: '#94a3b8', font: { size: 10 } }, grid: { color: '#1e293b' } }
+        },
+        plugins: { legend: { display: false } }
+      }
+    });
+
+    // 4. Data Fetching & UI Update
+    async function refreshDashboard() {
+      try {
+        // Fetch Realtime state
+        const rtRes = await fetch('/api/realtime');
+        const rtData = await rtRes.json();
+
+        // Update KPIs
+        document.getElementById('kpiSensors').innerText = rtData.kpis.total_active_sensors;
+        document.getElementById('kpiVehicles').innerText = rtData.kpis.total_vehicles.toLocaleString();
+        document.getElementById('kpiSpeed').innerText = rtData.kpis.avg_speed_city + ' km/h';
+        document.getElementById('kpiAlerts').innerText = rtData.kpis.active_alerts;
+
+        const banner = document.getElementById('alertBanner');
+        if (rtData.kpis.active_alerts > 0) {
+          banner.classList.remove('hidden');
+          document.getElementById('alertBannerText').innerText = 
+            `Warning: ${rtData.kpis.active_alerts} road sector(s) experiencing heavy congestion (Speed < 15 km/h or Volume > 500).`;
+        } else {
+          banner.classList.add('hidden');
+        }
+
+        // Update Sensors Table & Map
+        const tbody = document.getElementById('sensorsTableBody');
+        tbody.innerHTML = '';
+
+        rtData.sensors.forEach(sensor => {
+          const isCongested = sensor.is_congested === 1;
+          const statusBadge = isCongested
+            ? `<span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-red-500/20 text-red-400 border border-red-500/30">CONGESTED</span>`
+            : `<span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-500/20 text-emerald-400 border border-emerald-500/30">SMOOTH</span>`;
+
+          const tr = document.createElement('tr');
+          tr.className = isCongested ? "bg-red-950/20" : "hover:bg-slate-800/40";
+          tr.innerHTML = `
+            <td class="px-3.5 py-2.5 font-mono text-slate-300">${sensor.sensor_id}</td>
+            <td class="px-3.5 py-2.5 font-semibold text-slate-200">${sensor.road_name}</td>
+            <td class="px-3.5 py-2.5 ${sensor.vehicle_count > 500 ? 'text-red-400 font-bold' : 'text-slate-300'}">${sensor.vehicle_count}</td>
+            <td class="px-3.5 py-2.5 ${sensor.avg_speed < 15 ? 'text-red-400 font-bold' : 'text-slate-300'}">${sensor.avg_speed} km/h</td>
+            <td class="px-3.5 py-2.5 text-slate-300">${sensor.road_occupancy}%</td>
+            <td class="px-3.5 py-2.5">${statusBadge}</td>
+          `;
+          tbody.appendChild(tr);
+
+          // Update Map Marker
+          const markerColor = isCongested ? '#ef4444' : (sensor.road_occupancy > 60 ? '#f59e0b' : '#10b981');
+          if (!mapMarkers[sensor.sensor_id]) {
+            mapMarkers[sensor.sensor_id] = L.circleMarker([sensor.latitude, sensor.longitude], {
+              radius: 9,
+              fillColor: markerColor,
+              color: '#ffffff',
+              weight: 1.5,
+              opacity: 1,
+              fillOpacity: 0.85
+            }).addTo(map);
+          } else {
+            mapMarkers[sensor.sensor_id].setStyle({ fillColor: markerColor });
+          }
+
+          mapMarkers[sensor.sensor_id].bindPopup(`
+            <div style="font-family:sans-serif; color:#0f172a; font-size:12px;">
+              <strong>${sensor.road_name}</strong><br/>
+              Sensor: ${sensor.sensor_id}<br/>
+              Vehicles: <b>${sensor.vehicle_count}</b><br/>
+              Speed: <b>${sensor.avg_speed} km/h</b><br/>
+              Occupancy: <b>${sensor.road_occupancy}%</b><br/>
+              Status: <b style="color:${isCongested ? 'red' : 'green'}">${isCongested ? 'CONGESTION ALERT' : 'Normal Flow'}</b>
+            </div>
+          `);
+        });
+
+        // Fetch Analytics
+        const anRes = await fetch('/api/analytics');
+        const anData = await anRes.json();
+
+        // 1. Most Congested Road
+        if (anData.most_congested_road) {
+          const worst = anData.most_congested_road;
+          document.getElementById('worstRoadName').innerText = worst.road_name;
+          document.getElementById('worstRoadSpeed').innerText = worst.mean_speed + ' km/h';
+          document.getElementById('worstRoadOccupancy').innerText = worst.mean_occupancy + '%';
+          document.getElementById('worstRoadAlerts').innerText = worst.alert_count;
+        }
+
+        // 2. Peak Traffic Periods
+        const peakList = document.getElementById('peakHoursList');
+        peakList.innerHTML = '';
+        (anData.peak_traffic_periods || []).forEach((p, idx) => {
+          const div = document.createElement('div');
+          div.className = "flex items-center justify-between p-2 bg-slate-800/40 rounded border border-slate-700/40";
+          div.innerHTML = `
+            <span class="font-mono text-slate-300"><i class="fa-regular fa-clock mr-1 text-slate-400"></i> ${p.peak_hour}</span>
+            <span class="text-amber-400 font-bold">${p.avg_vehicles} avg veh/hr</span>
+          `;
+          peakList.appendChild(div);
+        });
+
+        // 3. Update Volume Trends Chart
+        if (anData.volume_trends && anData.volume_trends.length > 0) {
+          volumeTrendChart.data.labels = anData.volume_trends.map(t => t.timestamp.split(' ')[1] || t.timestamp);
+          volumeTrendChart.data.datasets[0].data = anData.volume_trends.map(t => t.vehicle_count);
+          volumeTrendChart.update();
+        }
+
+        // 4. Update Hourly Traffic Chart
+        if (anData.hourly_traffic && anData.hourly_traffic.length > 0) {
+          hourlyTrafficChart.data.labels = anData.hourly_traffic.map(h => h.hour_label);
+          hourlyTrafficChart.data.datasets[0].data = anData.hourly_traffic.map(h => h.avg_vehicle_count);
+          hourlyTrafficChart.update();
+        }
+
+        // Fetch Alerts
+        const alRes = await fetch('/api/alerts');
+        const alData = await alRes.json();
+        const alertListEl = document.getElementById('alertsList');
+        if (alData.alerts && alData.alerts.length > 0) {
+          alertListEl.innerHTML = '';
+          alData.alerts.forEach(alt => {
+            const item = document.createElement('div');
+            item.className = "p-2.5 rounded-lg border border-red-500/30 bg-red-950/20 text-xs";
+            item.innerHTML = `
+              <div class="flex items-center justify-between font-bold text-red-300">
+                <span>${alt.road_name}</span>
+                <span class="font-mono text-[10px] text-slate-400">${alt.timestamp.split(' ')[1] || alt.timestamp}</span>
+              </div>
+              <div class="text-[11px] text-red-400 mt-1 flex items-center gap-1">
+                <i class="fa-solid fa-triangle-exclamation text-xs"></i> ${alt.alert_reason}
+              </div>
+              <div class="text-[10px] text-slate-400 mt-1">
+                Count: <b>${alt.vehicle_count}</b> | Speed: <b>${alt.avg_speed} km/h</b> | Occ: <b>${alt.road_occupancy}%</b>
+              </div>
+            `;
+            alertListEl.appendChild(item);
+          });
+        }
+
+      } catch (err) {
+        console.error("Dashboard refresh error:", err);
+      }
+    }
+
+    // Initial Load & Refresh every 3 seconds
+    refreshDashboard();
+    setInterval(refreshDashboard, 3000);
+  </script>
+</body>
+</html>
