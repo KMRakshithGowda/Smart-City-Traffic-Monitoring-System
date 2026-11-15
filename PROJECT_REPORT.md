@@ -300,17 +300,17 @@ The Ubuntu 24.04 LTS terminal session on AWS EC2 displays `app.py` running on Po
 
 ---
 
-### Figure 3: Interactive Smart City Traffic Operations Dashboard
-The live cloud dashboard rendered in a browser. It displays the four top KPI cards (Active Sensors, Average City Speed, Total Hourly Volume, Active Congestion Alerts), the interactive OpenStreetMap with corridor pins, 24-hour volume trend bars, and the Most Congested Road ranking table.
+### Figure 3: Real-Time Smart City Traffic Operations Dashboard & Geospatial Heat Map
+The live operational dashboard hosted in the cloud. At the top, a prominent Critical Congestion Alert banner warns operators that 1 road sector is experiencing congestion (Speed < 15 km/h or Volume > 500). Below the banner, four real-time KPI cards present immediate city metrics: 6 Active Road Sensors streaming continuously, 1,530 Monitored Vehicle Volume, 33.4 km/h Citywide Average Speed, and 1 Active Congestion Alert. On the left, the interactive OpenStreetMap displays Bangalore corridors with color-coded status pins (Green = Smooth, Yellow = Moderate, Red = Congested). On the right, the analytics engine ranks Central Silk Board Junction as the #1 Most Congested Road (Average Speed: 16.8 km/h, Road Occupancy: 73.4%, Total Recorded Alerts: 1,933) alongside the identified Peak Traffic rush hours (09:00, 10:00, 17:00).
 
-![Smart City Traffic Dashboard Overview](report_assets/fig3_dashboard_overview.png)
+![Smart City Traffic Dashboard Overview](report_assets/fig3_dashboard_top.png)
 
 ---
 
-### Figure 4: Automated Congestion Alert Trigger Evidence
-Demonstration of an active congestion event along the Central Silk Board corridor (`Vehicle Count = 542`, `Average Speed = 11.4 km/h`). The map marker turns **Red**, a high-priority alert banner is displayed, and the incident is recorded in the live alert log.
+### Figure 4: Time-Series Volume Trends, 24-Hour Diurnal Histogram & Congestion Alert Audit Log
+The analytical and audit layer of the platform. The top-left chart displays the real-time Vehicle Volume Trends line graph plotting fluctuations across 3-second streaming cycles. The top-right chart illustrates the Average Traffic by Hour (24-Hour Trend) bar graph detailing diurnal volume distributions. In the lower section, the Live Smart City Sensor Feeds table reports instantaneous readings across all corridors (Airport Expressway, Hebbal, Indiranagar, MG Road, Outer Ring Road, and Silk Board) with active operational badges (SMOOTH vs CONGESTED). The Congestion Alert Log on the right tracks individual violation events with exact timestamps (e.g. 100ft Road Indiranagar: Speed 8.1 km/h, Outer Ring Road: Speed 14 km/h, Central Silk Board: Volume 521), providing a complete audit trail. The footer displays authenticated author credentials: Cloud Computing — K M Rakshith Gowda.
 
-![Congestion Alert Trigger & Incident Log](report_assets/fig4_congestion_alert.png)
+![Time-Series Volume Trends & Alert Log](report_assets/fig4_dashboard_bottom.png)
 
 ---
 
