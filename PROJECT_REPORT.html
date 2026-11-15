@@ -1,0 +1,643 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Design and Cloud Deployment of a Smart City Real-Time Traffic Monitoring System - K M Rakshith Gowda</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap');
+
+  :root {
+    --primary: #1e3a8a;
+    --primary-light: #2563eb;
+    --text-main: #1f2937;
+    --text-muted: #4b5563;
+    --border: #e5e7eb;
+    --bg-light: #f9fafb;
+    --code-bg: #f3f4f6;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    color: var(--text-main);
+    line-height: 1.65;
+    background: #ffffff;
+    padding: 0;
+  }
+
+  .container {
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 40px 30px;
+  }
+
+  /* Print Styles */
+  @media print {
+    body { font-size: 11pt; line-height: 1.5; color: #000; }
+    .container { max-width: 100%; padding: 0; }
+    .no-print { display: none !important; }
+    .page-break { page-break-after: always; }
+    a { text-decoration: none; color: #000; }
+    h1, h2, h3 { page-break-after: avoid; }
+    table, figure, .card { page-break-inside: avoid; }
+  }
+
+  /* Action Bar */
+  .action-bar {
+    background: #1e293b;
+    color: #fff;
+    padding: 14px 20px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-radius: 8px;
+    margin-bottom: 30px;
+  }
+  .action-bar button {
+    background: #2563eb;
+    color: #fff;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 6px;
+    font-weight: 600;
+    cursor: pointer;
+    font-size: 14px;
+    transition: background 0.2s;
+  }
+  .action-bar button:hover { background: #1d4ed8; }
+
+  /* Title Header */
+  .report-header {
+    text-align: center;
+    border-bottom: 2px solid var(--primary);
+    padding-bottom: 25px;
+    margin-bottom: 35px;
+  }
+  .university-title {
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+    margin-bottom: 8px;
+  }
+  .project-title {
+    font-size: 26px;
+    font-weight: 700;
+    color: var(--primary);
+    line-height: 1.3;
+    margin-bottom: 12px;
+  }
+  .project-subtitle {
+    font-size: 16px;
+    color: var(--text-muted);
+    margin-bottom: 20px;
+  }
+
+  .meta-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 12px;
+    text-align: left;
+    background: var(--bg-light);
+    border: 1px solid var(--border);
+    padding: 16px 20px;
+    border-radius: 8px;
+    font-size: 13.5px;
+  }
+  .meta-grid div strong { color: var(--primary); }
+
+  /* Headings */
+  h2 {
+    font-size: 18px;
+    font-weight: 700;
+    color: var(--primary);
+    border-bottom: 1.5px solid var(--border);
+    padding-bottom: 6px;
+    margin-top: 36px;
+    margin-bottom: 14px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+  h3 {
+    font-size: 15px;
+    font-weight: 600;
+    color: #111827;
+    margin-top: 20px;
+    margin-bottom: 8px;
+  }
+
+  p { margin-bottom: 12px; font-size: 14px; text-align: justify; }
+
+  /* Lists */
+  ul, ol { margin-left: 24px; margin-bottom: 14px; font-size: 14px; }
+  li { margin-bottom: 6px; }
+
+  /* Tables */
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 16px 0 24px 0;
+    font-size: 13px;
+  }
+  th, td {
+    padding: 10px 12px;
+    border: 1px solid var(--border);
+    text-align: left;
+  }
+  th {
+    background: var(--primary);
+    color: #fff;
+    font-weight: 600;
+  }
+  tr:nth-child(even) { background: var(--bg-light); }
+
+  /* Code Blocks */
+  pre {
+    background: #0f172a;
+    color: #f8fafc;
+    padding: 14px 16px;
+    border-radius: 6px;
+    overflow-x: auto;
+    font-family: 'JetBrains Mono', Consolas, monospace;
+    font-size: 12.5px;
+    line-height: 1.5;
+    margin: 14px 0 20px 0;
+  }
+  code {
+    font-family: 'JetBrains Mono', Consolas, monospace;
+    font-size: 12.5px;
+    background: var(--code-bg);
+    padding: 2px 5px;
+    border-radius: 4px;
+    color: #0f172a;
+  }
+  pre code {
+    background: transparent;
+    color: inherit;
+    padding: 0;
+  }
+
+  /* Figures */
+  figure {
+    margin: 24px 0;
+    text-align: center;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 12px;
+    background: var(--bg-light);
+  }
+  figure img {
+    max-width: 100%;
+    height: auto;
+    border-radius: 4px;
+    border: 1px solid #cbd5e1;
+  }
+  figcaption {
+    font-size: 12.5px;
+    font-weight: 600;
+    color: var(--text-muted);
+    margin-top: 10px;
+  }
+
+  /* Callout Boxes */
+  .alert-box {
+    background: #fef2f2;
+    border-left: 4px solid #ef4444;
+    padding: 12px 16px;
+    border-radius: 4px;
+    margin: 16px 0;
+    font-size: 13.5px;
+  }
+  .info-box {
+    background: #eff6ff;
+    border-left: 4px solid var(--primary-light);
+    padding: 12px 16px;
+    border-radius: 4px;
+    margin: 16px 0;
+    font-size: 13.5px;
+  }
+
+  .badge-pass {
+    background: #dcfce7;
+    color: #166534;
+    padding: 3px 8px;
+    border-radius: 4px;
+    font-weight: 700;
+    font-size: 11px;
+    display: inline-block;
+  }
+</style>
+</head>
+<body>
+
+<div class="container">
+
+  <!-- No-Print Action Bar -->
+  <div class="action-bar no-print">
+    <div>
+      <strong>📄 Project Report Ready for PDF Export</strong>
+      <div style="font-size: 12px; color: #94a3b8;">Author: K M Rakshith Gowda | Assignment #22</div>
+    </div>
+    <button onclick="window.print()">🖨️ Print to PDF / Save as PDF</button>
+  </div>
+
+  <!-- Header -->
+  <div class="report-header">
+    <div class="university-title">DEPARTMENT OF COMPUTER SCIENCE AND ENGINEERING</div>
+    <h1 class="project-title">Design and Cloud Deployment of a Smart City Real-Time Traffic Monitoring and Congestion Analytics System</h1>
+    <div class="project-subtitle">Cloud Computing Laboratory / Self-Study Assignment #22</div>
+
+    <div class="meta-grid">
+      <div><strong>Student Name:</strong> K M Rakshith Gowda</div>
+      <div><strong>Target Platform:</strong> Amazon Web Services (AWS Free Tier)</div>
+      <div><strong>Live Demo (HTTPS):</strong> <a href="https://jazz-clock-page-gourmet.trycloudflare.com" target="_blank">jazz-clock-page-gourmet.trycloudflare.com</a></div>
+      <div><strong>GitHub Repo:</strong> <a href="https://github.com/KMRakshithGowda/Smart-City-Traffic-Monitoring-System" target="_blank">Smart-City-Traffic-Monitoring-System</a></div>
+      <div><strong>AWS Account ID:</strong> 524320818385 (us-east-1)</div>
+      <div><strong>EC2 Instance:</strong> SmartCity-Traffic-VM (i-00a7016545ab521b3)</div>
+      <div><strong>Public IPv4:</strong> 98.84.86.227</div>
+      <div><strong>Evaluation Breakdown:</strong> 15 Marks (10 Report/Work + 5 Demo)</div>
+    </div>
+  </div>
+
+  <!-- Section 1 -->
+  <h2>1. Abstract & Problem Statement</h2>
+  <h3>1.1 Abstract</h3>
+  <p>Urban traffic congestion in expanding metropolitan regions produces severe economic drag, fuel waste, elevated vehicular emissions, and emergency dispatch delays. Traditional traffic logging mechanisms rely on periodic manual counts or static roadside timers that lack responsiveness to abrupt choke-points.</p>
+  <p>This project implements an end-to-end, cloud-hosted <strong>Smart City Traffic Monitoring & Congestion Analytics System</strong>. Edge-based IoT traffic sensor nodes stream multi-parameter vehicular telemetry over RESTful HTTP to an Amazon Web Services (AWS) EC2 Linux instance. Telemetry is validated, indexed in a time-series relational store, evaluated instantaneously against congestion safety thresholds, aggregated across 24-hour diurnal curves, and visualized through a high-performance OpenStreetMap dashboard with live heat markers and trend plots. The implementation operates strictly within the zero-cost AWS Free Tier boundary while maintaining global TLS/HTTPS accessibility.</p>
+
+  <h3>1.2 Problem Statement & Core Requirements</h3>
+  <p>As specified in Assignment Topic #22, the system fulfills the following technical requirements:</p>
+  <ul>
+    <li><strong>IoT Sensor Simulation:</strong> Emulate distributed roadside sensor nodes capturing Sensor ID, Vehicle Count, Average Speed, Road Occupancy %, and Timestamps.</li>
+    <li><strong>Cloud Virtual Machine Hosting:</strong> Deploy the backend ingestion gateway and analytical services onto an active AWS EC2 Linux VM.</li>
+    <li><strong>Time-Series Storage:</strong> Persist high-frequency telemetry in an indexed time-series data model.</li>
+    <li><strong>Automated Congestion Alert Engine:</strong> Automatically trigger high-priority alerts whenever <code>Vehicle Count &gt; 500</code> <strong>OR</strong> <code>Average Speed &lt; 15 km/h</code>.</li>
+    <li><strong>Real-Time Analytics:</strong> Continuously calculate the Most Congested Road, 24-Hour Average Traffic, Vehicular Volume Trends, and Peak Traffic Periods.</li>
+    <li><strong>Public Operations Dashboard:</strong> Deliver an interactive web dashboard with geospatial corridor mapping and historical audit log CSV exports.</li>
+  </ul>
+
+  <div class="page-break"></div>
+
+  <!-- Section 2 -->
+  <h2>2. System Architecture & Ingestion Pipeline</h2>
+  <p>The system is organized into a modular three-tier cloud computing architecture adhering to standard industry patterns:</p>
+
+  <pre>
+[ IoT Sensor Layer (simulator.py) ]
+  ├── SENS-MGROAD-01 (MG Road)            ├── SENS-AIRPORT-04 (Airport Expressway)
+  ├── SENS-SILKBOARD-02 (Silk Board)      ├── SENS-INDNAGAR-05 (Indiranagar 100ft)
+  └── SENS-ORR-03 (Outer Ring Road)       └── SENS-HEBBAL-06 (Hebbal Flyover)
+                 │
+                 ▼ (HTTP POST JSON Telemetry Stream every 3 seconds)
+[ AWS Cloud Computing Backend (EC2 t2.micro - us-east-1) | IP: 98.84.86.227 ]
+  ├── Ingestion & Validation Gateway (Flask on Port 80)
+  ├── Automated Congestion Detection Engine (Count &gt; 500 OR Speed &lt; 15 km/h)
+  ├── Time-Series Database Engine (SQLite3 with indexed timestamps)
+  ├── Analytics Engine (Hourly aggregates, Volume trends, Peak hours)
+  └── Cloudflare Zero Trust Edge Tunnel Daemon (cloudflared)
+                 │
+                 ▼ (Secure HTTPS Port 443)
+[ Operations Dashboard Layer ]
+  Target: https://jazz-clock-page-gourmet.trycloudflare.com
+  ├── Leaflet.js Geospatial OpenStreetMap Corridor Pins (Green / Red)
+  ├── Dynamic KPI Cards (Active Sensors, Mean Speed, City Volume, Alerts)
+  ├── Diurnal 24-Hour Volume Histogram (Chart.js)
+  └── Historical Congestion Log & CSV Audit Export
+  </pre>
+
+  <!-- Section 3 -->
+  <h2>3. IoT Telemetry Specification & Database Design</h2>
+  <h3>3.1 Telemetry Data Schema</h3>
+  <p>Each smart sensor node streams real-time JSON packets matching the schema below:</p>
+
+  <table>
+    <thead>
+      <tr>
+        <th>Field Name</th>
+        <th>Data Type</th>
+        <th>Constraint</th>
+        <th>Description</th>
+        <th>Sample Value</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><code>sensor_id</code></td>
+        <td>String</td>
+        <td>Primary Key Ref</td>
+        <td>Unique hardware sensor identifier</td>
+        <td><code>"SENS-SILKBOARD-02"</code></td>
+      </tr>
+      <tr>
+        <td><code>road_name</code></td>
+        <td>String</td>
+        <td>Not Null</td>
+        <td>Urban corridor / transit junction name</td>
+        <td><code>"Central Silk Board"</code></td>
+      </tr>
+      <tr>
+        <td><code>latitude</code></td>
+        <td>Float</td>
+        <td>-90.0 to +90.0</td>
+        <td>GPS latitude coordinate</td>
+        <td><code>12.9177</code></td>
+      </tr>
+      <tr>
+        <td><code>longitude</code></td>
+        <td>Float</td>
+        <td>-180.0 to +180.0</td>
+        <td>GPS longitude coordinate</td>
+        <td><code>77.6238</code></td>
+      </tr>
+      <tr>
+        <td><code>vehicle_count</code></td>
+        <td>Integer</td>
+        <td>&ge; 0</td>
+        <td>Vehicles recorded during 3-second sample</td>
+        <td><code>548</code></td>
+      </tr>
+      <tr>
+        <td><code>avg_speed</code></td>
+        <td>Float</td>
+        <td>&ge; 0.0 km/h</td>
+        <td>Mean vehicular velocity</td>
+        <td><code>11.8</code></td>
+      </tr>
+      <tr>
+        <td><code>road_occupancy</code></td>
+        <td>Float</td>
+        <td>0.0% – 100.0%</td>
+        <td>Percentage of roadway surface occupied</td>
+        <td><code>89.4</code></td>
+      </tr>
+      <tr>
+        <td><code>timestamp</code></td>
+        <td>Datetime</td>
+        <td>ISO 8601</td>
+        <td>Time telemetry was ingested by server</td>
+        <td><code>"2026-11-15 05:32:10"</code></td>
+      </tr>
+    </tbody>
+  </table>
+
+  <h3>3.2 Simulated Transit Corridors</h3>
+  <p>To evaluate the system under diverse conditions, six key Bengaluru transit corridors are modeled with realistic baseline distributions:</p>
+  <ul>
+    <li><strong>Central Silk Board (<code>SENS-SILKBOARD-02</code>):</strong> Chronic bottleneck corridor modeled with heavy baseline volume (380–650 vehicles) and depressed speeds (8–22 km/h). Frequently triggers alerts.</li>
+    <li><strong>Outer Ring Road - Bellandur (<code>SENS-ORR-03</code>):</strong> High-volume tech-park corridor exhibiting sharp peak-hour bursts (300–550 vehicles, 14–35 km/h).</li>
+    <li><strong>MG Road (<code>SENS-MGROAD-01</code>):</strong> Commercial hub with steady stop-and-go arterial flow (200–450 vehicles, 18–32 km/h).</li>
+    <li><strong>Hebbal Flyover (<code>SENS-HEBBAL-06</code>):</strong> Major arterial junction connecting North Bengaluru with bottleneck waves (250–520 vehicles, 12–28 km/h).</li>
+    <li><strong>Indiranagar 100ft Road (<code>SENS-INDNAGAR-05</code>):</strong> Mixed commercial-residential zone with evening peaks (180–400 vehicles, 20–40 km/h).</li>
+    <li><strong>Airport Expressway (<code>SENS-AIRPORT-04</code>):</strong> High-speed free-flow expressway serving as an operational control baseline (120–280 vehicles, 55–85 km/h).</li>
+  </ul>
+
+  <div class="page-break"></div>
+
+  <!-- Section 4 -->
+  <h2>4. Automated Congestion Alert Engine</h2>
+  <h3>4.1 Business Rules & Logic</h3>
+  <p>The alert engine continuously evaluates incoming sensor readings against the assignment criteria:</p>
+
+  <div class="alert-box">
+    <strong>Congestion Alert Trigger Condition:</strong><br>
+    <code>(Vehicle Count &gt; 500)</code> <strong>OR</strong> <code>(Average Speed &lt; 15.0 km/h)</code>
+  </div>
+
+  <pre><code class="language-python"># Congestion Evaluation Algorithm implemented in app.py
+def evaluate_congestion(vehicle_count, avg_speed):
+    is_congested = False
+    reasons = []
+    
+    if vehicle_count > 500:
+        is_congested = True
+        reasons.append("Vehicle Count > 500")
+        
+    if avg_speed < 15.0:
+        is_congested = True
+        reasons.append("Average Speed < 15 km/h")
+        
+    alert_reason = " AND ".join(reasons) if is_congested else ""
+    return is_congested, alert_reason</code></pre>
+
+  <p>Upon positive detection:</p>
+  <ol>
+    <li>The record is committed to SQLite with <code>is_congested = 1</code> and the specific rule violation string.</li>
+    <li>The client-side dashboard dynamically switches the corridor marker from <strong>Green</strong> to <strong>Red</strong>.</li>
+    <li>A high-visibility red alert notification bar is displayed across the dashboard header.</li>
+    <li>The event is logged in the real-time alert table with timestamps, vehicle volume, and speed readings.</li>
+  </ol>
+
+  <!-- Section 5 -->
+  <h2>5. Real-Time Analytics & Aggregation Modules</h2>
+  <p>The backend implements four analytical queries across the time-series store:</p>
+  <ul>
+    <li><strong>Most Congested Road:</strong> Aggregates historical readings grouped by corridor to identify the road with the highest frequency of congestion alerts and lowest average speed. <em>Result: Central Silk Board Junction ranked #1.</em></li>
+    <li><strong>Average Traffic by Hour (24-Hour Profile):</strong> Aggregates readings by hour of day (<code>00:00</code> to <code>23:00</code>) to compute diurnal traffic distributions for municipal planning.</li>
+    <li><strong>Vehicle Volume Trends:</strong> Provides a sliding 20-point chronological trend showing vehicular inflow rates across corridors.</li>
+    <li><strong>Peak Traffic Periods:</strong> Ranks the top three hourly intervals with peak city-wide volume (typically 09:00–10:00 and 18:00–20:00).</li>
+  </ul>
+
+  <div class="page-break"></div>
+
+  <!-- Section 6 -->
+  <h2>6. AWS Cloud Infrastructure & Free-Tier Networking Design</h2>
+  <p>The system was provisioned entirely within the <strong>AWS 100% Free Tier ($0.00 Budget)</strong>:</p>
+
+  <table>
+    <thead>
+      <tr>
+        <th>Resource Parameter</th>
+        <th>Configuration / Assigned Value</th>
+        <th>Free Tier Allowance</th>
+        <th>Billing Impact</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><strong>AWS Service</strong></td>
+        <td>Amazon Elastic Compute Cloud (EC2)</td>
+        <td>750 Hours / Month</td>
+        <td>$0.00 (100% Free)</td>
+      </tr>
+      <tr>
+        <td><strong>Region &amp; AZ</strong></td>
+        <td><code>us-east-1</code> (N. Virginia) | <code>us-east-1b</code></td>
+        <td>Global Free Tier Eligible</td>
+        <td>$0.00</td>
+      </tr>
+      <tr>
+        <td><strong>Instance ID &amp; Type</strong></td>
+        <td><code>i-00a7016545ab521b3</code> | <code>t2.micro</code> (1 vCPU, 1 GB RAM)</td>
+        <td>Eligible for 12 Months</td>
+        <td>$0.00</td>
+      </tr>
+      <tr>
+        <td><strong>Operating System</strong></td>
+        <td>Ubuntu Server 24.04 LTS (x86_64)</td>
+        <td>Included in Free Tier</td>
+        <td>$0.00</td>
+      </tr>
+      <tr>
+        <td><strong>Storage Disk (EBS)</strong></td>
+        <td>8.0 GiB General Purpose SSD (<code>gp3</code>)</td>
+        <td>Up to 30 GiB / Month Free</td>
+        <td>$0.00</td>
+      </tr>
+      <tr>
+        <td><strong>Public IPv4 Address</strong></td>
+        <td><code>98.84.86.227</code> (Private IP: <code>172.31.93.85</code>)</td>
+        <td>750 Hours Free Tier Included</td>
+        <td>$0.00</td>
+      </tr>
+      <tr>
+        <td><strong>Security Group</strong></td>
+        <td><code>SmartCity-Traffic-SG</code> (Ports 22, 80, 5000)</td>
+        <td>Unlimited Free</td>
+        <td>$0.00</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <div class="info-box">
+    <strong>Networking &amp; Carrier HTTPS Strictness Resolution:</strong><br>
+    Testing on mobile cellular networks (Jio / Airtel) and campus Wi-Fi revealed that direct browser navigation to <code>http://98.84.86.227:5000</code> timed out because mobile browsers enforce HTTPS upgrades and university gateways drop raw unencrypted IP ports.<br><br>
+    To solve this without incurring \$18/month AWS Application Load Balancer costs, a <strong>Cloudflare Zero Trust Edge Tunnel</strong> was deployed on the EC2 instance. Cloudflare provides edge TLS termination and proxies traffic to Port 80, delivering global, encrypted HTTPS access via: <strong><code>https://jazz-clock-page-gourmet.trycloudflare.com</code></strong>.
+  </div>
+
+  <!-- Section 7 -->
+  <h2>7. Testing Matrix & Experimental Verification</h2>
+  <p>The platform underwent thorough functional testing to validate all operational requirements:</p>
+
+  <table>
+    <thead>
+      <tr>
+        <th>Test ID</th>
+        <th>Scenario</th>
+        <th>Input Data</th>
+        <th>Expected Output</th>
+        <th>Observed Output</th>
+        <th>Status</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><strong>TC-01</strong></td>
+        <td>Normal Flow Ingestion</td>
+        <td>Count: 220, Speed: 45 km/h, Occ: 35%</td>
+        <td>Status 201; <code>is_congested=0</code>; Green pin</td>
+        <td>Stored; Green pin maintained; No alert banner</td>
+        <td><span class="badge-pass">PASS</span></td>
+      </tr>
+      <tr>
+        <td><strong>TC-02</strong></td>
+        <td>High Volume Congestion</td>
+        <td>Count: 580, Speed: 22 km/h, Occ: 82%</td>
+        <td>Alert triggered (<code>Count &gt; 500</code>); Red alert</td>
+        <td>Flagged in DB; Alert banner fired; Pin turns Red</td>
+        <td><span class="badge-pass">PASS</span></td>
+      </tr>
+      <tr>
+        <td><strong>TC-03</strong></td>
+        <td>Low Speed Congestion</td>
+        <td>Count: 420, Speed: 11.2 km/h, Occ: 88%</td>
+        <td>Alert triggered (<code>Speed &lt; 15 km/h</code>)</td>
+        <td>Alert logged: "Average Speed &lt; 15 km/h"</td>
+        <td><span class="badge-pass">PASS</span></td>
+      </tr>
+      <tr>
+        <td><strong>TC-04</strong></td>
+        <td>Dual Threshold Trigger</td>
+        <td>Count: 640, Speed: 8.5 km/h, Occ: 94%</td>
+        <td>Both rules flagged in alert reason</td>
+        <td>Reason: "Vehicle Count &gt; 500 AND Speed &lt; 15 km/h"</td>
+        <td><span class="badge-pass">PASS</span></td>
+      </tr>
+      <tr>
+        <td><strong>TC-05</strong></td>
+        <td>Analytics API Query</td>
+        <td><code>GET /api/analytics</code></td>
+        <td>JSON payload with most congested road &amp; hours</td>
+        <td>HTTP 200 OK; Correct calculations verified</td>
+        <td><span class="badge-pass">PASS</span></td>
+      </tr>
+      <tr>
+        <td><strong>TC-06</strong></td>
+        <td>Historical CSV Export</td>
+        <td><code>GET /api/export-csv</code></td>
+        <td>Downloadable CSV with full sensor audit trail</td>
+        <td><code>traffic_sensor_evidence.csv</code> downloaded successfully</td>
+        <td><span class="badge-pass">PASS</span></td>
+      </tr>
+      <tr>
+        <td><strong>TC-07</strong></td>
+        <td>Cross-Device Access</td>
+        <td>Client access via Mobile 5G &amp; Desktop</td>
+        <td>Dashboard responsive with valid HTTPS certificate</td>
+        <td>Verified on Android, iOS, Edge, and Chrome</td>
+        <td><span class="badge-pass">PASS</span></td>
+      </tr>
+    </tbody>
+  </table>
+
+  <div class="page-break"></div>
+
+  <!-- Section 8 -->
+  <h2>8. Project Deliverables & Visual Evidence</h2>
+
+  <figure>
+    <img src="report_assets/fig1_aws_instance_and_security.jpg" alt="AWS EC2 Instance Running & Security Group">
+    <figcaption><strong>Figure 1:</strong> AWS EC2 Management Console verifying <code>SmartCity-Traffic-VM</code> (<code>i-00a7016545ab521b3</code>) in Running state with Public IP <code>98.84.86.227</code>, alongside active Security Group inbound rules for Ports 22 (SSH), 5000 (Flask), and 80 (HTTP).</figcaption>
+  </figure>
+
+  <figure>
+    <img src="report_assets/fig2_cloudflared_and_terminal.png" alt="EC2 Terminal Session and Cloudflare Tunnel">
+    <figcaption><strong>Figure 2:</strong> Ubuntu 24.04 LTS terminal session on AWS EC2 showing <code>app.py</code> and <code>simulator.py</code> background execution, local <code>curl -I http://localhost</code> returning HTTP 200 OK, and Cloudflare Tunnel establishing secure HTTPS delivery.</figcaption>
+  </figure>
+
+  <div class="page-break"></div>
+
+  <figure>
+    <img src="report_assets/fig3_dashboard_overview.png" alt="Smart City Operations Dashboard Overview">
+    <figcaption><strong>Figure 3:</strong> Live Smart City Traffic Operations Dashboard displaying top KPI cards (Active Sensors, City Speed, Volume, Alerts), interactive OpenStreetMap geospatial tracking with corridor markers, and real-time volume trend charts.</figcaption>
+  </figure>
+
+  <figure>
+    <img src="report_assets/fig4_congestion_alert.png" alt="Active Congestion Alert Evidence">
+    <figcaption><strong>Figure 4:</strong> Active congestion alert event along Central Silk Board corridor (Speed: 11.4 km/h, Volume: 542). The map marker switches to Red, an alert notification banner is raised, and the event is logged into the audit table.</figcaption>
+  </figure>
+
+  <div class="page-break"></div>
+
+  <!-- Section 9 -->
+  <h2>9. Challenges Encountered & Engineering Solutions</h2>
+  <ol>
+    <li><strong>Zero-Cost Architecture Constraint:</strong> Managed time-series engines like AWS Timestream or AWS Managed Grafana exceed student free limits. This was addressed by implementing an open-source architecture with SQLite3 time-series indexing and Leaflet.js directly on a single EC2 <code>t2.micro</code> instance, incurring strictly $0.00.</li>
+    <li><strong>Mobile ISP & Campus Firewall HTTPS Upgrades:</strong> Testing on mobile 5G carriers and campus Wi-Fi resulted in connection dropouts on raw IP ports. Deploying a Cloudflare Edge Tunnel on Port 80 resolved this by providing free edge TLS termination without requiring paid domains or AWS load balancers.</li>
+    <li><strong>HTTP Method Separation on Ingestion Gateway:</strong> Direct browser navigation to <code>/api/ingest</code> initially returned HTTP 405 (Method Not Allowed). Implemented dual routing: <code>GET</code> returns operational health JSON, while <code>POST</code> processes sensor telemetry streams.</li>
+  </ol>
+
+  <!-- Section 10 -->
+  <h2>10. Conclusion & Future Enhancements</h2>
+  <p>The <strong>Smart City Traffic Monitoring System</strong> successfully satisfies all criteria outlined for Assignment #22. It demonstrates the complete implementation lifecycle of a cloud-native IoT solution: cloud VM provisioning, security group configuration, high-frequency telemetry ingestion, time-series data persistence, deterministic alert rule processing, and multi-device geospatial visualization.</p>
+  <p><strong>Future Enhancements:</strong></p>
+  <ul>
+    <li><strong>Edge Computer Vision:</strong> Deploying lightweight YOLOv8-nano models on edge camera microcomputers for automated physical vehicle counting.</li>
+    <li><strong>Adaptive Traffic Signal Actuation:</strong> Implementing automated webhooks to trigger dynamic green-signal timing extensions when corridors are flagged by the congestion engine.</li>
+  </ul>
+
+  <!-- Section 11 -->
+  <h2>11. 3-Minute Viva Presentation Script</h2>
+  <ul>
+    <li><strong>0:00 – 0:45 (Introduction & Architecture):</strong> <em>"Good morning Sir. My name is K M Rakshith Gowda, and my project is Assignment #22: Smart City Traffic Monitoring System. I deployed an end-to-end IoT traffic intelligence platform hosted on an AWS EC2 Linux VM (t2.micro) running in the us-east-1 region. The entire architecture is built strictly within the zero-cost AWS Free Tier."</em></li>
+    <li><strong>0:45 – 1:30 (Live IoT Ingestion & Map):</strong> <em>"Here is our live dashboard accessible at jazz-clock-page-gourmet.trycloudflare.com. An IoT sensor simulator streams real-time readings every 3 seconds for 6 major Bengaluru transit corridors—including Silk Board, MG Road, and Hebbal. The dashboard displays live KPI cards, road occupancy percentages, and interactive OpenStreetMap corridor markers."</em></li>
+    <li><strong>1:30 – 2:15 (Automated Congestion Detection Demo):</strong> <em>"Now, let us examine the automated alert engine. As specified in the assignment rules, if vehicle count exceeds 500 OR average speed drops below 15 km/h, the system immediately fires a congestion alert. As you can see, the Silk Board corridor just recorded a speed of 11.4 km/h: its marker instantly turns red, an alert banner appears, and the event is committed to our time-series database."</em></li>
+    <li><strong>2:15 – 3:00 (Analytics, CSV Audit & Conclusion):</strong> <em>"Below the map, our analytics engine calculates the Most Congested Road, 24-hour volume trends, and peak traffic periods. Operators can also export the full audit trail as a CSV file with one click. To ensure mobile accessibility, we implemented a zero-cost edge TLS tunnel for HTTPS encryption. Thank you, Sir, I am happy to answer any questions."</em></li>
+  </ul>
+
+</div>
+
+</body>
+</html>
