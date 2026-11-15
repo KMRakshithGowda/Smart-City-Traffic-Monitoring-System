@@ -1,14 +1,15 @@
 # DESIGN AND CLOUD DEPLOYMENT OF A SMART CITY REAL-TIME TRAFFIC MONITORING AND CONGESTION ANALYTICS SYSTEM
 
-**Course:** Cloud Computing Laboratory & Theory  
-**Assignment Topic:** Assignment #22 — Smart City Traffic Monitoring System  
-**Submitted By:** **K M Rakshith Gowda**  
-**Department:** Computer Science and Engineering  
+**Course:** Cloud Computing  
+**Student Name:** **K M Rakshith Gowda**  
+**Register Number:** `24UG00267`  
+**Degree / Class:** Bachelor of Computer Applications (BCA) — 3rd Year (5th Semester)  
 **Target Platform:** Amazon Web Services (AWS) — Free Tier Architecture  
 **Public Live Cloud Demo:** [https://jazz-clock-page-gourmet.trycloudflare.com](https://jazz-clock-page-gourmet.trycloudflare.com)  
 **GitHub Repository:** [https://github.com/KMRakshithGowda/Smart-City-Traffic-Monitoring-System](https://github.com/KMRakshithGowda/Smart-City-Traffic-Monitoring-System)  
 **AWS Account ID:** `524320818385` | **Region:** `us-east-1` (N. Virginia)  
 **EC2 Instance ID:** `i-00a7016545ab521b3` | **Public IPv4:** `98.84.86.227`  
+**Evaluation Breakdown:** 15 Total Marks (10 Marks Project Work & Report + 5 Marks Presentation/Demo)  
 
 ---
 
@@ -36,7 +37,7 @@ Urban traffic management in growing metropolitan centers requires continuous dat
 This project presents the design, implementation, and cloud deployment of an end-to-end **Smart City Traffic Monitoring System**. Distributed IoT traffic sensor nodes stream multi-parameter telemetry—including vehicle count, average vehicular speed, and road occupancy percentage—over RESTful HTTP to an Amazon Web Services (AWS) EC2 Linux instance. Telemetry is persisted in a time-series relational datastore, analyzed in real time for congestion violations, aggregated across historical 24-hour windows, and served to traffic controllers through an interactive geospatial OpenStreetMap interface. The system operates strictly within the zero-cost AWS Free Tier while delivering global HTTPS accessibility.
 
 ### 1.2 Problem Statement
-Metropolitan transit corridors experience dynamic congestion waves during peak office hours and unexpected road incidents. The system must fulfill the following operational criteria specified in Assignment #22:
+Metropolitan transit corridors experience dynamic congestion waves during peak office hours and unexpected road incidents. The system must fulfill the following operational criteria specified in the project requirements:
 1. Simulate distributed IoT traffic sensors generating realistic urban traffic conditions.
 2. Ingest telemetry into a cloud-hosted time-series storage backend.
 3. Automatically trigger instantaneous alerts when vehicular volume exceeds **500 vehicles** OR average speed drops below **15 km/h**.
@@ -175,7 +176,7 @@ CREATE INDEX IF NOT EXISTS idx_road_congest ON sensor_readings(road_name, is_con
 ## 5. AUTOMATED CONGESTION ALERT ENGINE
 
 ### 5.1 Business Logic Specification
-As stipulated in Assignment #22, traffic congestion must be flagged dynamically whenever either of the following conditions is satisfied:
+As stipulated in the project specifications, traffic congestion must be flagged dynamically whenever either of the following conditions is satisfied:
 
 $$\text{Congestion Flag} = \begin{cases} 1, & \text{if } (\text{vehicle\_count} > 500) \lor (\text{avg\_speed} < 15.0\text{ km/h}) \\ 0, & \text{otherwise} \end{cases}$$
 
@@ -210,7 +211,7 @@ When a congestion event occurs:
 
 ## 6. REAL-TIME ANALYTICS & AGGREGATION MODULES
 
-The backend computes four core traffic analytics required by the assignment:
+The backend computes four core traffic analytics required by the project:
 
 ### 6.1 Most Congested Road Identification
 Aggregates all time-series records to rank roads by total alert occurrences and lowest average speed:
@@ -331,7 +332,7 @@ Demonstration of an active congestion event along the Central Silk Board corrido
 
 ## 11. CONCLUSION & FUTURE SCOPE
 
-The **Smart City Traffic Monitoring System** fully satisfies all theoretical and practical requirements of Assignment #22. It successfully demonstrates the complete lifecycle of a cloud-native IoT solution: virtual machine provisioning on AWS EC2, automated firewall configuration, RESTful telemetry streaming, time-series data modeling, real-time threshold alert evaluation, and multi-device geospatial visualization.
+The **Smart City Traffic Monitoring System** fully satisfies all technical and practical requirements of the project. It successfully demonstrates the complete lifecycle of a cloud-native IoT solution: virtual machine provisioning on AWS EC2, automated firewall configuration, RESTful telemetry streaming, time-series data modeling, real-time threshold alert evaluation, and multi-device geospatial visualization.
 
 ### Future Enhancements:
 * **Edge Computer Vision:** Integrating lightweight object detection models (YOLOv8-nano) on edge traffic cameras to automate physical vehicle counting.
@@ -344,13 +345,13 @@ The **Smart City Traffic Monitoring System** fully satisfies all theoretical and
 *Use this structured walkthrough during your laboratory evaluation:*
 
 * **0:00 – 0:45 (Introduction & Cloud Architecture):**  
-  *"Good morning Sir. My name is K M Rakshith Gowda, and my project is Assignment #22: Smart City Traffic Monitoring System. I deployed an end-to-end IoT traffic intelligence platform hosted on an AWS EC2 Linux VM (t2.micro) running in the us-east-1 region. The entire architecture is built strictly within the zero-cost AWS Free Tier."*
+  *"Good morning Sir. My name is K M Rakshith Gowda, 3rd year BCA student (Reg No: 24UG00267). My project is the Smart City Traffic Monitoring and Congestion Analytics System. I deployed an end-to-end IoT traffic intelligence platform hosted on an AWS EC2 Linux VM (t2.micro) running in the us-east-1 region. The entire architecture is built strictly within the zero-cost AWS Free Tier."*
 
 * **0:45 – 1:30 (Live IoT Ingestion & Geospatial Map):**  
   *"Here is our live dashboard accessible at jazz-clock-page-gourmet.trycloudflare.com. An IoT sensor simulator streams real-time readings every 3 seconds for 6 major Bengaluru transit corridors—including Silk Board, MG Road, and Hebbal. The dashboard displays live KPI cards, road occupancy percentages, and interactive OpenStreetMap corridor markers."*
 
 * **1:30 – 2:15 (Automated Congestion Detection Demo):**  
-  *"Now, let us examine the automated alert engine. As specified in the assignment rules, if vehicle count exceeds 500 OR average speed drops below 15 km/h, the system immediately fires a congestion alert. As you can see, the Silk Board corridor just recorded a speed of 11.4 km/h: its marker instantly turns red, an alert banner appears, and the event is committed to our time-series database."*
+  *"Now, let us examine the automated alert engine. As specified in the requirements, if vehicle count exceeds 500 OR average speed drops below 15 km/h, the system immediately fires a congestion alert. As you can see, the Silk Board corridor just recorded a speed of 11.4 km/h: its marker instantly turns red, an alert banner appears, and the event is committed to our time-series database."*
 
 * **2:15 – 3:00 (Analytics, CSV Audit & Conclusion):**  
   *"Below the map, our analytics engine calculates the Most Congested Road, 24-hour volume trends, and peak traffic periods. Operators can also export the full audit trail as a CSV file with one click. To ensure mobile accessibility, we implemented a zero-cost edge TLS tunnel for HTTPS encryption. Thank you, Sir, I am happy to answer any questions."*
