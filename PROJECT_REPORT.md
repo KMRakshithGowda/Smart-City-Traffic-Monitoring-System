@@ -7,7 +7,10 @@
 **Assignment Number:** 22  
 **Domain:** Transportation / Real-Time IoT Analytics  
 **Submitted By:** **K M Rakshith Gowda**  
-**Target Cloud Platform:** Amazon Web Services (AWS) — 100% Free Tier Architecture  
+**Target Cloud Platform:** Amazon Web Services (AWS) — 100% Free Tier Architecture (`t2.micro` in `us-east-1`)  
+**Live Public Cloud Demo (HTTPS):** [https://jazz-clock-page-gourmet.trycloudflare.com](https://jazz-clock-page-gourmet.trycloudflare.com)  
+**AWS EC2 Instance ID:** `i-00a7016545ab521b3` | **Public IP:** `98.84.86.227`  
+**GitHub Repository:** [https://github.com/KMRakshithGowda/Smart-City-Traffic-Monitoring-System](https://github.com/KMRakshithGowda/Smart-City-Traffic-Monitoring-System)  
 **Evaluation Breakdown:** 15 Total Marks (10 Marks Project Work & Report + 5 Marks Presentation/Demo)  
 
 ---
@@ -63,17 +66,19 @@ The application is structured into four cohesive layers adhering to standard clo
          │
          ▼ (HTTP POST JSON Stream every 3 seconds)
 [ AWS Cloud Infrastructure - Free Tier ]
-  - Security Group (Firewall): Inbound Ports 22 (SSH), 5000 (HTTP)
-  - AWS EC2 Linux VM (t2.micro):
+  - Security Group (Firewall): Inbound Ports 22 (SSH), 80 (HTTP), 5000 (Custom TCP)
+  - AWS EC2 Linux VM (t2.micro - Ubuntu 24.04 LTS):
       ├── Ingestion Gateway (POST /api/ingest)
       ├── Congestion Alert Engine (Count > 500 OR Speed < 15 km/h)
       ├── Time-Series Database (traffic_data.db / InfluxDB Model)
       ├── Analytics Aggregator (Hourly Means, Volume Trends, Peak Hours)
-      └── Cloud Web Dashboard Server (Flask Engine on Port 5000)
+      ├── Cloud Web Dashboard Server (Flask Engine on Port 80)
+      └── Cloudflare Zero Trust Edge Tunnel (HTTPS TLS Termination)
          │
          ▼
 [ Client & Operations Layer ]
-  - Browser Access via Public IP: http://<EC2-Public-IP>:5000
+  - Global HTTPS Access: https://jazz-clock-page-gourmet.trycloudflare.com
+  - Direct EC2 Public IP Access: http://98.84.86.227:80
   - Live OpenStreetMap Heat Map (Leaflet.js)
   - Time-Series Charts (Chart.js)
   - CSV Evidence Export Engine
@@ -207,23 +212,30 @@ This project is deployed entirely within the **AWS Free Tier ($0 Budget)**:
 
 1. **Virtual Machine Provisioning:**
    * **Service:** Amazon Elastic Compute Cloud (EC2)
+   * **Instance Name:** `SmartCity-Traffic-VM`
+   * **Instance ID:** `i-00a7016545ab521b3`
+   * **Region:** `us-east-1` (US East, N. Virginia)
    * **Instance Type:** `t2.micro` (1 vCPU, 1 GB RAM, 750 free hours/month)
-   * **Operating System:** Ubuntu Server 22.04 LTS / 24.04 LTS (HVM)
-   * **Storage:** 20 GB General Purpose SSD (gp3) (Free up to 30 GB)
-2. **Security Group (Firewall) Rules:**
-   * Inbound Rule 1: `SSH` | Protocol: `TCP` | Port: `22` | Source: `My IP` (or `0.0.0.0/0`)
-   * Inbound Rule 2: `Custom TCP` | Protocol: `TCP` | Port: `5000` | Source: `0.0.0.0/0` (Dashboard Access)
+   * **Operating System:** Ubuntu Server 24.04 LTS (HVM)
+   * **Storage:** 8 GB General Purpose SSD (gp3) (Free up to 30 GB)
+   * **Public IPv4:** `98.84.86.227` | **Private IP:** `172.31.93.85`
+2. **Security Group (Firewall) Rules (`SmartCity-Traffic-SG`):**
+   * Inbound Rule 1: `SSH` | Protocol: `TCP` | Port: `22` | Source: `0.0.0.0/0` (Remote Administration)
+   * Inbound Rule 2: `HTTP` | Protocol: `TCP` | Port: `80` | Source: `0.0.0.0/0` (Standard Web Traffic)
+   * Inbound Rule 3: `Custom TCP` | Protocol: `TCP` | Port: `5000` | Source: `0.0.0.0/0` (Development Port)
 3. **Execution on EC2 Instance:**
    ```bash
-   sudo apt update && sudo apt install -y python3-pip git
-   pip3 install flask requests
-   # Run server in the background
-   nohup python3 app.py > app.log 2>&1 &
-   # Run IoT simulator in the background
-   nohup python3 simulator.py --target http://127.0.0.1:5000/api/ingest > sim.log 2>&1 &
+   sudo apt update && sudo apt install -y python3-flask python3-requests git
+   # Run web server & analytics engine on port 80
+   sudo nohup python3 app.py > app.log 2>&1 &
+   # Run IoT simulator streaming telemetry every 3 seconds
+   nohup python3 simulator.py --target http://127.0.0.1:80/api/ingest > sim.log 2>&1 &
+   # Deploy Cloudflare Edge Tunnel for secure global HTTPS delivery
+   nohup ./cloudflared tunnel --url http://localhost:80 > cf.log 2>&1 &
    ```
 4. **Public Verification:**
-   Accessible worldwide at: `http://<EC2-Public-IP>:5000`
+   * Global Live URL: `https://jazz-clock-page-gourmet.trycloudflare.com`
+   * Direct IPv4 URL: `http://98.84.86.227`
 
 ---
 
@@ -245,23 +257,26 @@ This project is deployed entirely within the **AWS Free Tier ($0 Budget)**:
 When preparing your final document submission, insert the following original screenshots:
 
 * [ ] **Screenshot 1: AWS EC2 Management Console**  
-  *Showing the `t2.micro` instance in "Running" state with public IPv4 address and Free Tier badge.*
+  *Showing `SmartCity-Traffic-VM` (`i-00a7016545ab521b3`, `t2.micro`) in "Running" state with public IP `98.84.86.227`.*
 * [ ] **Screenshot 2: EC2 Security Group Configuration**  
-  *Showing Inbound Rules allowing Port 22 (SSH) and Port 5000 (Custom TCP).*
-* [ ] **Screenshot 3: Terminal Output of Sensor Simulator**  
-  *Showing `simulator.py` streaming telemetry and printing `[NORMAL FLOW]` and `[ALERT FIRED]`.*
+  *Showing Inbound Rules allowing Port 22 (SSH), Port 80 (HTTP), and Port 5000 (Custom TCP).*
+* [ ] **Screenshot 3: Terminal Output of Sensor Simulator & Server**  
+  *Showing `simulator.py` streaming telemetry and printing `[NORMAL FLOW]` and `[ALERT FIRED]`, along with `curl -I http://localhost` returning HTTP 200 OK.*
 * [ ] **Screenshot 4: Real-Time Traffic Operations Dashboard**  
   *Showing the top navigation bar, 4 KPI cards, OpenStreetMap with colored markers, and volume charts.*
 * [ ] **Screenshot 5: Active Congestion Alert Evidence**  
   *Showing the red alert banner and the logged alert details when speed < 15 km/h or vehicle count > 500.*
+* [ ] **Screenshot 6: Global Cloud Delivery on Mobile & Laptop via HTTPS**  
+  *Showing the live dashboard accessed via `https://jazz-clock-page-gourmet.trycloudflare.com` running seamlessly on mobile and desktop browsers.*
 
 ---
 
 ## 10. Challenges Faced & Lessons Learned
 
-1. **Zero-Cost Cloud Architecture:** Choosing to host open-source time-series storage and visualization directly on an EC2 `t2.micro` instance prevented high costs associated with proprietary managed services like AWS Timestream or Managed Grafana.
-2. **Handling Browser GET vs. API POST Requests:** Initial direct navigation to `/api/ingest` returned HTTP 405 (Method Not Allowed). Implemented route handling for both `GET` (health status) and `POST` (sensor telemetry) to ensure smooth operation.
-3. **Geospatial Mapping without Billing Dependencies:** Replaced proprietary mapping APIs requiring billing credentials with OpenStreetMap and Leaflet.js, ensuring 100% free operation and rapid rendering.
+1. **Zero-Cost Cloud Architecture:** Choosing to host open-source time-series storage and visualization directly on an EC2 `t2.micro` instance prevented recurring cloud expenses associated with proprietary managed services like AWS Timestream or Managed Grafana, staying strictly within the 100% Free Tier limit.
+2. **Campus Firewall & Mobile HTTPS Strictness Resolution:** During public testing, campus Wi-Fi networks and modern mobile web browsers (Chrome/JioSphere on Android) refused raw unencrypted HTTP connections or non-standard ports (`:5000`). To resolve this without paying for Amazon Route 53 or AWS Application Load Balancers (\$16+/month), a Cloudflare Edge Tunnel was provisioned directly on the EC2 instance. This delivered end-to-end TLS encryption with valid SSL certificates, making the dashboard globally accessible over standard HTTPS for zero cost.
+3. **Handling Browser GET vs. API POST Requests:** Direct browser navigation to `/api/ingest` initially returned HTTP 405 (Method Not Allowed). Implemented dual-method route handling for both `GET` (returns operational health JSON) and `POST` (ingests sensor telemetry) to ensure fault tolerance.
+4. **Geospatial Mapping without Billing Dependencies:** Replaced Google Maps API (which requires an active credit card billing account) with OpenStreetMap and Leaflet.js, ensuring 100% free operation, zero API key expiration risk, and rapid tile loading.
 
 ---
 

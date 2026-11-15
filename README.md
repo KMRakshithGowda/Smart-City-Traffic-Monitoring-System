@@ -1,7 +1,9 @@
 # Smart City Traffic Monitoring & Congestion Analytics System
 **Cloud Computing SA Assignment #22**  
 **Author:** K M Rakshith Gowda  
-**Target Environment:** AWS Free Tier (EC2 `t2.micro` Linux VM)
+**Target Environment:** AWS Free Tier (EC2 `t2.micro` Linux VM)  
+**Live Public Cloud Demo:** [https://jazz-clock-page-gourmet.trycloudflare.com](https://jazz-clock-page-gourmet.trycloudflare.com)  
+**AWS Instance ID:** `i-00a7016545ab521b3` | **Public IP:** `98.84.86.227` (us-east-1)
 
 ---
 
@@ -11,13 +13,14 @@
               │ (HTTP/REST Ingestion every 3s)
               ▼
 [ AWS EC2 Linux VM (t2.micro - Free Tier) ]
-   ├── Ingestion & Analytics Engine (app.py - Flask)
+   ├── Ingestion & Analytics Engine (app.py - Flask on Port 80)
    ├── Time-Series Database (traffic_data.db)
    ├── Congestion Detection Engine (Count > 500 OR Speed < 15 km/h)
+   ├── Cloudflare Secure Edge Tunnel (HTTPS TLS Termination)
    └── Interactive Operations Dashboard (Leaflet.js + Chart.js + OpenStreetMap)
               │
               ▼
-[ Web Browser Access: http://<EC2-Public-IP>:5000 ]
+[ Global Public Access: https://jazz-clock-page-gourmet.trycloudflare.com ]
 ```
 
 ---
