@@ -5,7 +5,7 @@
 **Register Number:** `24UG00267`  
 **Degree / Class:** Bachelor of Computer Applications (BCA) — 3rd Year (5th Semester)  
 **Target Platform:** Amazon Web Services (AWS) — Free Tier Architecture  
-**Public Live Cloud Demo:** [https://jazz-clock-page-gourmet.trycloudflare.com](https://jazz-clock-page-gourmet.trycloudflare.com)  
+**Public Live Cloud Demo:** [https://searches-linux-temperatures-knives.trycloudflare.com](https://searches-linux-temperatures-knives.trycloudflare.com)  
 **GitHub Repository:** [https://github.com/KMRakshithGowda/Smart-City-Traffic-Monitoring-System](https://github.com/KMRakshithGowda/Smart-City-Traffic-Monitoring-System)  
 **AWS Account ID:** `524320818385` | **Region:** `us-east-1` (N. Virginia)  
 **EC2 Instance ID:** `i-00a7016545ab521b3` | **Public IPv4:** `98.84.86.227`  
@@ -111,7 +111,7 @@ The platform is designed around a three-tier cloud computing architecture:
                                      v
 +-------------------------------------------------------------------------+
 |                      3. OPERATIONS DASHBOARD LAYER                      |
-|  Target URL: https://jazz-clock-page-gourmet.trycloudflare.com           |
+|  Target URL: https://searches-linux-temperatures-knives.trycloudflare.com     |
 |                                                                         |
 |  - Real-Time KPI Cards (Active Sensors, Average Speed, Volume, Alerts)  |
 |  - Geospatial Map (Leaflet.js + OpenStreetMap with Dynamic Markers)     |
@@ -265,7 +265,7 @@ To solve this without incurring costs for AWS Application Load Balancers (\$18/m
 * A Cloudflare Zero Trust tunnel (`cloudflared`) was deployed directly on the EC2 instance.
 * It established an outbound TLS tunnel proxying traffic from port 80 to Cloudflare's global edge network.
 * Cloudflare terminates SSL with a valid certificate and routes requests under the verified domain:  
-  **`https://jazz-clock-page-gourmet.trycloudflare.com`**
+  **`https://searches-linux-temperatures-knives.trycloudflare.com`**
 * This delivered zero-cost, enterprise-grade HTTPS accessibility across laptops and smartphones worldwide.
 
 ---
@@ -294,7 +294,7 @@ The virtual machine `SmartCity-Traffic-VM` (`i-00a7016545ab521b3`) is shown in t
 ---
 
 ### Figure 2: Cloud Server Terminal Execution & Tunnel Setup
-The Ubuntu 24.04 LTS terminal session on AWS EC2 displays `app.py` running on Port 80, `simulator.py` streaming telemetry every 3 seconds, `curl -I http://localhost` returning `HTTP/1.1 200 OK`, and the Cloudflare Tunnel daemon establishing the secure public URL `https://jazz-clock-page-gourmet.trycloudflare.com`.
+The Ubuntu 24.04 LTS terminal session on AWS EC2 displays `app.py` running on Port 80, `simulator.py` streaming telemetry every 3 seconds, `curl -I http://localhost` returning `HTTP/1.1 200 OK`, and the Cloudflare Tunnel daemon establishing the secure public URL `https://searches-linux-temperatures-knives.trycloudflare.com`.
 
 ![EC2 Terminal Session & Cloudflare Tunnel Execution](report_assets/fig2_cloudflared_and_terminal.png)
 
@@ -348,7 +348,7 @@ The **Smart City Traffic Monitoring System** fully satisfies all technical and p
   *"Good morning Sir. My name is K M Rakshith Gowda, 3rd year BCA student (Reg No: 24UG00267). My project is the Smart City Traffic Monitoring and Congestion Analytics System. I deployed an end-to-end IoT traffic intelligence platform hosted on an AWS EC2 Linux VM (t2.micro) running in the us-east-1 region. The entire architecture is built strictly within the zero-cost AWS Free Tier."*
 
 * **0:45 – 1:30 (Live IoT Ingestion & Geospatial Map):**  
-  *"Here is our live dashboard accessible at jazz-clock-page-gourmet.trycloudflare.com. An IoT sensor simulator streams real-time readings every 3 seconds for 6 major Bengaluru transit corridors—including Silk Board, MG Road, and Hebbal. The dashboard displays live KPI cards, road occupancy percentages, and interactive OpenStreetMap corridor markers."*
+  *"Here is our live dashboard accessible at searches-linux-temperatures-knives.trycloudflare.com. An IoT sensor simulator streams real-time readings every 3 seconds for 6 major Bengaluru transit corridors—including Silk Board, MG Road, and Hebbal. The dashboard displays live KPI cards, road occupancy percentages, and interactive OpenStreetMap corridor markers."*
 
 * **1:30 – 2:15 (Automated Congestion Detection Demo):**  
   *"Now, let us examine the automated alert engine. As specified in the requirements, if vehicle count exceeds 500 OR average speed drops below 15 km/h, the system immediately fires a congestion alert. As you can see, the Silk Board corridor just recorded a speed of 11.4 km/h: its marker instantly turns red, an alert banner appears, and the event is committed to our time-series database."*

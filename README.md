@@ -26,7 +26,7 @@ An end-to-end cloud-native IoT traffic telemetry, real-time congestion detection
 
 | Environment | Access Link / Host | Protocol | Status |
 | :--- | :--- | :--- | :--- |
-| **Global Cloud Demo** | [https://jazz-clock-page-gourmet.trycloudflare.com](https://jazz-clock-page-gourmet.trycloudflare.com) | HTTPS (Port 443) | 🟢 **Live 24/7** |
+| **Global Cloud Demo** | [https://searches-linux-temperatures-knives.trycloudflare.com](https://searches-linux-temperatures-knives.trycloudflare.com) | HTTPS (Port 443) | 🟢 **Live 24/7** |
 | **AWS Direct IPv4** | `http://98.84.86.227` | HTTP (Port 80) | 🟢 **Active** |
 | **Local Development** | `http://localhost:5000` | HTTP (Port 5000) | 💻 **Localhost** |
 
@@ -74,7 +74,7 @@ An end-to-end cloud-native IoT traffic telemetry, real-time congestion detection
 |  +---------------------------------+---------------------------------+  |
 |  | Cloudflare Edge TLS Tunnel Daemon (cloudflared)                   |  |
 |  | - Outbound encrypted tunnel from Port 80 to Cloudflare Edge       |  |
-|  | - Public Domain: jazz-clock-page-gourmet.trycloudflare.com         |  |
+|  | - Public Domain: searches-linux-temperatures-knives.trycloudflare.com |  |
 |  +-------------------------------------------------------------------+  |
 +------------------------------------+------------------------------------+
                                      |
